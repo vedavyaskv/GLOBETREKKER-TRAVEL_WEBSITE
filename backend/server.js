@@ -196,7 +196,6 @@ app.post("/register", async (req, res) => {
         await twilioClient.messages.create({
           body: smsMessage,
           from: process.env.TWILIO_PHONE_NUMBER,
-          // For Twilio trial, phone numbers must be verified and in E.164 format (+countrycode...)
           to: phone.startsWith("+") ? phone : "+91" + phone,
         });
         console.log(`SMS sent to ${phone}`);
@@ -214,7 +213,9 @@ app.post("/register", async (req, res) => {
   }
 });
 
+// Serve React build files for any other requests
 app.use(express.static(path.join(__dirname, "..", "frontend", "build")));
+
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"));
 });
