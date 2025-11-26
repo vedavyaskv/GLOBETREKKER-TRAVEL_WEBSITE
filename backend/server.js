@@ -110,11 +110,14 @@ app.post("/subscribe", async (req, res) => {
 });
 
 // Contact
-app.post("/contact", async (req, res) => {
+app.post("/contact", (req, res) => {
   const { name, email, message } = req.body;
 
-  if (!name || !email || !message)
+  if (!name || !email || !message) {
     return res.status(400).json({ error: "Please fill all fields" });
+  }
+
+  res.json({ message: "Message received successfully. We'll get back to you soon!" });
 
   try {
     const transporter = nodemailer.createTransport({
@@ -122,24 +125,31 @@ app.post("/contact", async (req, res) => {
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
     });
 
-    await transporter.sendMail({
-      from: `"${name}" <${email}>`,
-      to: process.env.EMAIL_USER,
-      subject: "New Contact Message - GlobeTrekker",
-      html: `
-        <h3>Message Received</h3>
-        <p><b>Name:</b> ${name}</p>
-        <p><b>Email:</b> ${email}</p>
-        <p><b>Message:</b> ${message}</p>
-      `,
-    });
-
-    res.json({ message: "Message sent successfully" });
-  } catch (err) {
-    console.error("Contact error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    transporter.sendMail(
+      {
+        from: `"${name}" <${email}>`,
+        to: process.env.EMAIL_USER,
+        subject: "New Contact Message - GlobeTrekker",
+        html: `
+          <h3>You've got a new message</h3>
+          <p><b>Name:</b> ${name}</p>
+          <p><b>Email:</b> ${email}</p>
+          <p><b>Message:</b> ${message}</p>
+        `,
+      },
+      (err, info) => {
+        if (err) {
+          console.error("Contact email error:", err);
+        } else {
+          console.log("Contact email sent:", info.response);
+        }
+      }
+    );
+  } catch (error) {
+    console.error("Contact form fatal error:", error);
   }
 });
+
 
 // Signup
 app.post("/signup", async (req, res) => {
