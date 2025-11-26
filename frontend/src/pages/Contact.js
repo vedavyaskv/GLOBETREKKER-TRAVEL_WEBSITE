@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://globetrekker-travel-website-2.onrender.com"
+    : "http://localhost:5000";
+
 export default function Contact() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -19,15 +24,15 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("https://globetrekker-travel-website-2.onrender.com/contact", {
+      const res = await fetch(`${API_BASE_URL}/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
       });
       const data = await res.json();
       if (res.ok) {
-        alert(data.message);             // Pop up alert on success
-        navigate("/");                   // Go to main page
+        alert(data.message);
+        navigate("/");
       } else {
         alert(data.error || "Error, try again.");
       }

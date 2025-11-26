@@ -2,18 +2,44 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube, FaLinkedinIn } from 'react-icons/fa';
 
+const API_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://globetrekker-travel-website-2.onrender.com"
+    : "http://localhost:5000";
+
 export default function Footer() {
   const emailRef = useRef();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!emailRef.current.value) {
+
+    const email = emailRef.current?.value.trim();
+    if (!email) {
       emailRef.current.focus();
       emailRef.current.style.border = '2px solid #d32f2f';
       return;
     }
     emailRef.current.style.border = '';
-    alert("Subscribed!");
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert(data.message || "Subscribed successfully!");
+        emailRef.current.value = "";
+      } else {
+        alert(data.error || data.message || "Error subscribing. Try again.");
+      }
+    } catch (err) {
+      console.error("Subscribe error:", err);
+      alert("Network error. Please try again later.");
+    }
   };
 
   const iconStyle = {

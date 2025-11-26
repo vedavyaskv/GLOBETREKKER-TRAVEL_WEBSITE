@@ -5,17 +5,19 @@ export default function Register() {
   const [username, setUsername] = useState('');
   const [userEmail, setUserEmail] = useState('');
 
-  // Username fetched from localStorage (simulating a database) on mount:
+  const API_BASE_URL =
+    process.env.NODE_ENV === "production"
+      ? "https://globetrekker-travel-website-2.onrender.com"
+      : "http://localhost:5000";
+
   useEffect(() => {
     setUsername(localStorage.getItem('username') || '');
   }, []);
 
-  // Email is editable
   const handleChangeEmail = (e) => {
     setUserEmail(e.target.value);
   };
 
-  // Calculate minimum date (7 days from today)
   const today = new Date();
   const minDate = new Date(today);
   minDate.setDate(today.getDate() + 7);
@@ -27,12 +29,14 @@ export default function Register() {
     const data = Object.fromEntries(formData.entries());
     data.username = username;
     data.email = userEmail;
+
     try {
-      const res = await fetch("https://globetrekker-travel-website-2.onrender.com/register", {
+      const res = await fetch(`${API_BASE_URL}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+
       if (res.ok) {
         setShowModal(true);
         e.target.reset();
@@ -134,9 +138,7 @@ export default function Register() {
             style={{ padding: 12, fontSize: 16, borderRadius: 10, border: '1px solid #ccc' }}
             defaultValue=""
           >
-            <option value="" disabled>
-              Select Destination
-            </option>
+            <option value="" disabled>Select Destination</option>
             <option>Interlaken</option>
             <option>Male</option>
             <option>Rome</option>
@@ -153,9 +155,7 @@ export default function Register() {
             style={{ padding: 12, fontSize: 16, borderRadius: 10, border: '1px solid #ccc' }}
             defaultValue=""
           >
-            <option value="" disabled>
-              Select Package
-            </option>
+            <option value="" disabled>Select Package</option>
             <option>Voyager Package</option>
             <option>Discoverer Package</option>
             <option>Explorer Package</option>

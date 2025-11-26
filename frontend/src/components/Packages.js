@@ -61,7 +61,7 @@ const packages = [
 
 export default function Packages() {
   return (
-    <section id="packages" style={{ background: "#f7f8fa", padding: "60px 0" }}>
+    <section id="packages" style={{ background: "#f7f8fa", padding: "25px 0" }}>
       <h2 style={{
         textAlign: "center",
         color: "#07406e",
