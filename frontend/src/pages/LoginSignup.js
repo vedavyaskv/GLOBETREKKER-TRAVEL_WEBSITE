@@ -12,6 +12,8 @@ import { useNavigate } from "react-router-dom";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
+const API_BASE_URL = "https://globetrekker-travel-website-2.onrender.com";
+
 export default function LoginSignup() {
   const navigate = useNavigate();
   const [isSignup, setIsSignup] = useState(false);
@@ -40,13 +42,16 @@ export default function LoginSignup() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
     if (isSignup && formData.password !== formData.confirmPassword) {
       setError("Passwords don't match");
       return;
     }
+
     const url = isSignup
-  ? "https://globetrekker-travel-website-2.onrender.com/signup"
-  : "https://globetrekker-travel-website-2.onrender.com/login";
+      ? `${API_BASE_URL}/signup`
+      : `${API_BASE_URL}/login`;
+
     const payload = isSignup
       ? {
           username: formData.username,
@@ -61,7 +66,9 @@ export default function LoginSignup() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       const data = await res.json();
+
       if (!res.ok) {
         setError(data.error || "Something went wrong");
       } else {
@@ -140,7 +147,6 @@ export default function LoginSignup() {
                     edge="end"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
-                    {}
                     {showPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
@@ -165,7 +171,6 @@ export default function LoginSignup() {
                       edge="end"
                       aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                     >
-                      {}
                       {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                     </IconButton>
                   </InputAdornment>
