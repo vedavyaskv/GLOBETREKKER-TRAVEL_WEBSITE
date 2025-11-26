@@ -1,11 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE_URL = "https://globetrekker-travel-website-2.onrender.com";
-
 export default function Contact() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,62 +18,47 @@ export default function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-
     try {
-      const res = await fetch(`${API_BASE_URL}/contact`, {
+      const res = await fetch("https://globetrekker-travel-website-2.onrender.com/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
       });
-
       const data = await res.json();
-      setLoading(false);
-
       if (res.ok) {
-        alert(data.message || "Message sent successfully!");
-        navigate("/");
+        alert(data.message);             // Pop up alert on success
+        navigate("/");                   // Go to main page
       } else {
-        alert(data.error || "Error submitting form. Try again.");
+        alert(data.error || "Error, try again.");
       }
     } catch (err) {
-      setLoading(false);
-      alert("Network error. Please try again later.");
+      alert("Something went wrong.");
       console.error(err);
     }
   };
 
   return (
-    <section
-      className="contact-section"
-      style={{
-        maxWidth: 600,
-        margin: "150px auto 60px auto",
-        padding: 30,
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        boxShadow: "0 8px 20px rgba(0, 0, 0, 0.06)",
-        textAlign: "center",
-        fontFamily: "'Segoe UI', sans-serif",
-        color: "#333",
-      }}
-    >
-      <h1
-        style={{
-          fontSize: 28,
-          color: "#155ab6",
-          marginBottom: 10,
-        }}
-      >
-        Get in Touch
-      </h1>
-      <p
-        style={{
-          color: "#666",
-          marginBottom: 30,
-        }}
-      >
-        Have a question or want to connect? Fill out the form below and we'll get back to you shortly.
+    <section className="contact-section" style={{
+      maxWidth: 600,
+      margin: "150px auto 60px auto",
+      padding: 30,
+      backgroundColor: "#fff",
+      borderRadius: 12,
+      boxShadow: "0 8px 20px rgba(0, 0, 0, 0.06)",
+      textAlign: "center",
+      fontFamily: "'Segoe UI', sans-serif",
+      color: "#333"
+    }}>
+      <h1 style={{
+        fontSize: 28,
+        color: "#155ab6",
+        marginBottom: 10,
+      }}>Get in Touch</h1>
+      <p style={{
+        color: "#666",
+        marginBottom: 30
+      }}>
+        Have a question, comment, or just want to say hello? Fill out the form below and we'll get back to you soon.
       </p>
 
       <form className="contact-form" onSubmit={handleSubmit}>
@@ -94,6 +76,7 @@ export default function Contact() {
             border: "1px solid #ccc",
             borderRadius: 8,
             fontSize: 16,
+            resize: "none"
           }}
         />
         <input
@@ -110,6 +93,7 @@ export default function Contact() {
             border: "1px solid #ccc",
             borderRadius: 8,
             fontSize: 16,
+            resize: "none"
           }}
         />
         <textarea
@@ -126,16 +110,15 @@ export default function Contact() {
             border: "1px solid #ccc",
             borderRadius: 8,
             fontSize: 16,
+            resize: "none"
           }}
         />
-
         <button
           type="submit"
-          disabled={loading}
           style={{
             padding: "12px 25px",
             fontSize: 16,
-            backgroundColor: loading ? "#888" : "#155ab6",
+            backgroundColor: "#155ab6",
             color: "white",
             border: "none",
             borderRadius: 8,
@@ -143,7 +126,7 @@ export default function Contact() {
             transition: "background 0.3s ease"
           }}
         >
-          {loading ? "Sending..." : "Send Message"}
+          Send Message
         </button>
       </form>
     </section>
