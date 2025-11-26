@@ -17,7 +17,8 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors({
   origin: [
-    "https://globetrekker-travel-website.vercel.app", 
+    "https://globetrekker-travel-website.vercel.app",
+    /\.vercel\.app$/,
     "http://localhost:3000",
     "http://localhost:5173",
   ],
