@@ -1,20 +1,16 @@
-import React, { useState, useEffect } from "react";
-
-const API_BASE_URL = "https://globetrekker-travel-website-2.onrender.com";
+import React, { useState, useEffect } from 'react';
 
 export default function Register() {
   const [showModal, setShowModal] = useState(false);
-  const [username, setUsername] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState('');
+  const [userEmail, setUserEmail] = useState('');
 
+  // Username fetched from localStorage (simulating a database) on mount:
   useEffect(() => {
-    const storedUsername = localStorage.getItem("username") || "";
-    const storedEmail = localStorage.getItem("email") || "";
-    setUsername(storedUsername);
-    setUserEmail(storedEmail);
+    setUsername(localStorage.getItem('username') || '');
   }, []);
 
+  // Email is editable
   const handleChangeEmail = (e) => {
     setUserEmail(e.target.value);
   };
@@ -23,54 +19,32 @@ export default function Register() {
   const today = new Date();
   const minDate = new Date(today);
   minDate.setDate(today.getDate() + 7);
-  const minDateString = minDate.toISOString().split("T")[0];
+  const minDateString = minDate.toISOString().split('T')[0];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!username) {
-      alert("Please log in first before registering for a trip.");
-      return;
-    }
-
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
     data.username = username;
     data.email = userEmail;
-
-    setLoading(true);
-
     try {
-      const res = await fetch(`${API_BASE_URL}/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch("https://globetrekker-travel-website-2.onrender.com/register", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-
-      const resData = await res.json();
-      setLoading(false);
-
       if (res.ok) {
         setShowModal(true);
         e.target.reset();
-        // keep email in state (userEmail) or clear if you want:
-        // setUserEmail('');
+        setUserEmail('');
         setTimeout(() => setShowModal(false), 3000);
-
-        if (resData.message) {
-          console.log(resData.message);
-        }
       } else {
-        alert(
-          `❌ Registration failed: ${
-            resData.error || resData.message || "Please try again."
-          }`
-        );
+        const errData = await res.json();
+        alert(`❌ Registration failed: ${errData.error || 'Please try again.'}`);
       }
     } catch (error) {
-      console.error("Error:", error);
-      setLoading(false);
-      alert("Something went wrong. Please try again later.");
+      console.error('Error:', error);
+      alert('Something went wrong. Please try again later.');
     }
   };
 
@@ -80,31 +54,30 @@ export default function Register() {
         className="register-section"
         style={{
           maxWidth: 700,
-          margin: "auto",
-          background: "white",
+          margin: 'auto',
+          background: 'white',
           padding: 40,
           borderRadius: 15,
-          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
           fontFamily: "'Poppins', sans-serif",
-          color: "#333",
+          color: '#333',
         }}
       >
         <h1
           style={{
-            fontSize: "2.4rem",
-            color: "#07406e",
+            fontSize: '2.4rem',
+            color: '#07406e',
             marginBottom: 30,
-            textAlign: "center",
+            textAlign: 'center',
             marginTop: 70,
           }}
         >
           Register for Your Dream Trip
         </h1>
-
         <form
           onSubmit={handleSubmit}
           className="register-form"
-          style={{ display: "flex", flexDirection: "column", gap: 20 }}
+          style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
         >
           <input
             type="text"
@@ -116,24 +89,17 @@ export default function Register() {
               padding: 12,
               fontSize: 16,
               borderRadius: 10,
-              border: "1px solid #ccc",
-              backgroundColor: "#f0f0f0",
+              border: '1px solid #ccc',
+              backgroundColor: '#f0f0f0',
             }}
           />
-
           <input
             type="text"
             name="name"
             placeholder="Full Name"
             required
-            style={{
-              padding: 12,
-              fontSize: 16,
-              borderRadius: 10,
-              border: "1px solid #ccc",
-            }}
+            style={{ padding: 12, fontSize: 16, borderRadius: 10, border: '1px solid #ccc' }}
           />
-
           <input
             type="email"
             name="email"
@@ -141,28 +107,16 @@ export default function Register() {
             value={userEmail}
             onChange={handleChangeEmail}
             required
-            style={{
-              padding: 12,
-              fontSize: 16,
-              borderRadius: 10,
-              border: "1px solid #ccc",
-            }}
+            style={{ padding: 12, fontSize: 16, borderRadius: 10, border: '1px solid #ccc' }}
           />
-
           <input
             type="tel"
             name="phone"
             placeholder="Mobile Number"
             required
-            style={{
-              padding: 12,
-              fontSize: 16,
-              borderRadius: 10,
-              border: "1px solid #ccc",
-            }}
+            style={{ padding: 12, fontSize: 16, borderRadius: 10, border: '1px solid #ccc' }}
           />
-
-          <div style={{ display: "flex", alignItems: "center", gap: 30 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 30 }}>
             <label>Gender</label>
             <label>
               <input type="radio" name="gender" value="Male" required /> Male
@@ -174,16 +128,10 @@ export default function Register() {
               <input type="radio" name="gender" value="Other" required /> Other
             </label>
           </div>
-
           <select
             name="destination"
             required
-            style={{
-              padding: 12,
-              fontSize: 16,
-              borderRadius: 10,
-              border: "1px solid #ccc",
-            }}
+            style={{ padding: 12, fontSize: 16, borderRadius: 10, border: '1px solid #ccc' }}
             defaultValue=""
           >
             <option value="" disabled>
@@ -199,16 +147,10 @@ export default function Register() {
             <option>Kyoto</option>
             <option>Sydney</option>
           </select>
-
           <select
             name="package"
             required
-            style={{
-              padding: 12,
-              fontSize: 16,
-              borderRadius: 10,
-              border: "1px solid #ccc",
-            }}
+            style={{ padding: 12, fontSize: 16, borderRadius: 10, border: '1px solid #ccc' }}
             defaultValue=""
           >
             <option value="" disabled>
@@ -219,28 +161,17 @@ export default function Register() {
             <option>Explorer Package</option>
             <option>Globetrotter Package</option>
           </select>
-
-          <label
-            htmlFor="travel-date"
-            style={{ fontWeight: 600, fontSize: 16 }}
-          >
+          <label htmlFor="travel-date" style={{ fontWeight: 600, fontSize: 16 }}>
             Select Travel Date
           </label>
-
           <input
             type="date"
             id="travel-date"
             name="date"
             required
             min={minDateString}
-            style={{
-              padding: 12,
-              fontSize: 16,
-              borderRadius: 6,
-              border: "1px solid #ccc",
-            }}
+            style={{ padding: 12, fontSize: 16, borderRadius: 6, border: '1px solid #ccc' }}
           />
-
           <textarea
             name="notes"
             placeholder="Any special requests or notes..."
@@ -249,57 +180,35 @@ export default function Register() {
               minHeight: 100,
               fontSize: 16,
               borderRadius: 10,
-              border: "1px solid #ccc",
-              resize: "vertical",
+              border: '1px solid #ccc',
+              resize: 'vertical',
             }}
           />
-
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              fontSize: 14,
-            }}
-          >
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
             <input
               type="checkbox"
               name="terms"
               required
-              style={{
-                width: 18,
-                height: 18,
-                accentColor: "#07406e",
-                cursor: "pointer",
-              }}
+              style={{ width: 18, height: 18, accentColor: '#07406e', cursor: 'pointer' }}
             />
             I accept the Terms & Conditions.
           </label>
-
           <button
             type="submit"
-            disabled={loading}
             style={{
-              backgroundColor: loading ? "#999" : "#07406e",
-              color: "white",
+              backgroundColor: '#07406e',
+              color: 'white',
               padding: 14,
-              border: "none",
+              border: 'none',
               borderRadius: 25,
-              fontSize: "1.1rem",
-              cursor: "pointer",
-              transition: "background 0.3s ease",
+              fontSize: '1.1rem',
+              cursor: 'pointer',
+              transition: 'background 0.3s ease',
             }}
-            onMouseOver={(e) => {
-              if (!loading)
-                e.currentTarget.style.backgroundColor = "#0c2d48";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = loading
-                ? "#999"
-                : "#07406e";
-            }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#0c2d48')}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#07406e')}
           >
-            {loading ? "Submitting..." : "Submit"}
+            Submit
           </button>
         </form>
       </section>
@@ -307,31 +216,30 @@ export default function Register() {
       {showModal && (
         <div
           style={{
-            position: "fixed",
+            position: 'fixed',
             top: 0,
             left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.6)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
             zIndex: 1000,
           }}
         >
           <div
             style={{
-              background: "white",
+              background: 'white',
               padding: 40,
               borderRadius: 10,
-              textAlign: "center",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+              textAlign: 'center',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
             }}
           >
-            <h2 style={{ marginBottom: 10, color: "#07406e" }}>🎉 Success!</h2>
+            <h2 style={{ marginBottom: 10, color: '#07406e' }}>🎉 Success!</h2>
             <p style={{ fontSize: 18 }}>
-              Congratulations, your registration is complete! A confirmation
-              email has been sent.
+              Congratulations, your registration is complete! A confirmation email has been sent.
             </p>
           </div>
         </div>
