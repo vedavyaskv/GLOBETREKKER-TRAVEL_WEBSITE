@@ -45,8 +45,8 @@ export default function LoginSignup() {
       return;
     }
     const url = isSignup
-  ? "https://globetrekker-backend.onrender.com/signup"
-  : "https://globetrekker-backend.onrender.com/login";
+  ? "https://globetrekker-travel-website-2.onrender.com/signup"
+  : "https://globetrekker-travel-website-2.onrender.com/login";
     const payload = isSignup
       ? {
           username: formData.username,

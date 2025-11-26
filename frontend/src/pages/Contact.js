@@ -19,7 +19,7 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("https://globetrekker-backend.onrender.com/contact", {
+      const res = await fetch("https://globetrekker-travel-website-2.onrender.com/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
