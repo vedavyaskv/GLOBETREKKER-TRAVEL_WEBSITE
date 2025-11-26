@@ -239,7 +239,7 @@ export default function Register() {
           >
             <h2 style={{ marginBottom: 10, color: '#07406e' }}>🎉 Success!</h2>
             <p style={{ fontSize: 18 }}>
-              Congratulations, your registration is complete! A confirmation email has been sent.
+              Congratulations, your registration is complete! We will get in touch with you soon. Thank you.
             </p>
           </div>
         </div>

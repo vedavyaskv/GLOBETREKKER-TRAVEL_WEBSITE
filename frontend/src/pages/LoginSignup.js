@@ -12,6 +12,11 @@ import { useNavigate } from "react-router-dom";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
+const API_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://globetrekker-travel-website-2.onrender.com"
+    : "http://localhost:5000";
+
 export default function LoginSignup() {
   const navigate = useNavigate();
   const [isSignup, setIsSignup] = useState(false);
@@ -40,13 +45,16 @@ export default function LoginSignup() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
     if (isSignup && formData.password !== formData.confirmPassword) {
       setError("Passwords don't match");
       return;
     }
+
     const url = isSignup
-  ? "https://globetrekker-travel-website-2.onrender.com/signup"
-  : "https://globetrekker-travel-website-2.onrender.com/login";
+      ? `${API_BASE_URL}/signup`
+      : `${API_BASE_URL}/login`;
+
     const payload = isSignup
       ? {
           username: formData.username,
@@ -61,7 +69,9 @@ export default function LoginSignup() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       const data = await res.json();
+
       if (!res.ok) {
         setError(data.error || "Something went wrong");
       } else {
@@ -101,6 +111,7 @@ export default function LoginSignup() {
         <Typography variant="h4" gutterBottom align="center">
           {isSignup ? "Sign Up" : "Log In"}
         </Typography>
+
         <form onSubmit={handleSubmit} noValidate>
           {isSignup && (
             <TextField
@@ -113,6 +124,7 @@ export default function LoginSignup() {
               margin="normal"
             />
           )}
+
           <TextField
             label={isSignup ? "Email" : "Username / Email"}
             name="emailOrUsername"
@@ -123,6 +135,7 @@ export default function LoginSignup() {
             margin="normal"
             type={isSignup ? "email" : "text"}
           />
+
           <TextField
             label="Password"
             name="password"
@@ -135,18 +148,14 @@ export default function LoginSignup() {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton
-                    onClick={toggleShowPassword}
-                    edge="end"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {}
+                  <IconButton onClick={toggleShowPassword} edge="end">
                     {showPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               ),
             }}
           />
+
           {isSignup && (
             <TextField
               label="Confirm Password"
@@ -160,12 +169,7 @@ export default function LoginSignup() {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton
-                      onClick={toggleShowConfirmPassword}
-                      edge="end"
-                      aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
-                    >
-                      {}
+                    <IconButton onClick={toggleShowConfirmPassword} edge="end">
                       {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                     </IconButton>
                   </InputAdornment>
@@ -173,11 +177,14 @@ export default function LoginSignup() {
               }}
             />
           )}
+
           {error && <Typography color="error" sx={{ mt: 1 }}>{error}</Typography>}
+
           <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
             {isSignup ? "Sign Up" : "Log In"}
           </Button>
         </form>
+
         <Typography sx={{ mt: 2 }} align="center">
           {isSignup ? (
             <>
