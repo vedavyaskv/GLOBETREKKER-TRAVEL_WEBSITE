@@ -7,7 +7,11 @@
   },
   "dependencies": {
     "express": "^4.x",
+    "mongoose": "^7.x",
     "cors": "^2.x",
-    "dotenv": "^16.x"
+    "dotenv": "^16.x",
+    "nodemailer": "^6.x",
+    "bcrypt": "^5.x",
+    "twilio": "^4.x"
   }
 }
