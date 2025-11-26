@@ -44,7 +44,9 @@ export default function LoginSignup() {
       setError("Passwords don't match");
       return;
     }
-    const url = isSignup ? "/signup" : "/login";
+    const url = isSignup
+  ? "https://globetrekker-backend.onrender.com/signup"
+  : "https://globetrekker-backend.onrender.com/login";
     const payload = isSignup
       ? {
           username: formData.username,

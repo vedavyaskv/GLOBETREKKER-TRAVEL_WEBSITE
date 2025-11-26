@@ -21,10 +21,15 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
 });
 
 app.use(cors({
-  origin: "*",
+  origin: [
+    "https://globetrekker-travel.vercel.app", 
+    "http://localhost:3000",
+    "http://localhost:5173"
+  ],
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -213,12 +218,10 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Serve React build files for any other requests
-app.use(express.static(path.join(__dirname, "..", "frontend", "build")));
-
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"));
+app.get("/", (req, res) => {
+  res.send("🔥 GlobeTrekker Backend Running Successfully!");
 });
+
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
