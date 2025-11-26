@@ -2,14 +2,15 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
-const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-["MONGO_URI", "EMAIL_USER", "EMAIL_PASS"].forEach((key) => {
+["MONGO_URI", "RESEND_API_KEY", "EMAIL_FROM"].forEach((key) => {
   if (!process.env[key]) {
     console.warn(`⚠️ Missing env var: ${key}`);
   }
@@ -26,10 +27,10 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// MongoDB Connect
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => {
@@ -37,7 +38,7 @@ mongoose.connect(process.env.MONGO_URI)
     process.exit(1);
   });
 
-// Schemas and Models
+// Schemas & Models
 const subscriberSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   subscribedAt: { type: Date, default: Date.now },
@@ -65,7 +66,7 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model("User", userSchema);
 
-// Newsletter subscription
+// ===================== SUBSCRIBE =====================
 app.post("/subscribe", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
@@ -73,134 +74,137 @@ app.post("/subscribe", async (req, res) => {
   try {
     const existing = await Subscriber.findOne({ email });
     if (existing) return res.status(409).json({ message: "Already subscribed" });
+
     await Subscriber.create({ email });
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-    });
-    await transporter.sendMail({
-      from: `GlobeTrekker <${process.env.EMAIL_USER}>`,
+
+    await resend.emails.send({
+      from: `GlobeTrekker <${process.env.EMAIL_FROM}>`,
       to: email,
       subject: "🎉 Welcome to GlobeTrekker!",
       html: `<p>Thanks for subscribing to GlobeTrekker updates! 🌍</p>`,
     });
+
     res.json({ message: "Subscription successful" });
   } catch (error) {
-    console.error("Subscription error:", error);
-    res.status(500).json({ error: "Internal server error." });
+    console.error("SUBSCRIBE ERROR:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Contact form submission
+// ===================== CONTACT =====================
 app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
+
   if (!name || !email || !message)
     return res.status(400).json({ error: "Please fill all fields" });
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-    });
-    await transporter.sendMail({
-      from: `"${name}" <${email}>`,
-      to: process.env.EMAIL_USER,
+    await resend.emails.send({
+      from: "GlobeTrekker Contact <onboarding@resend.dev>",
+      to: process.env.EMAIL_ADMIN,
       subject: "New Contact Message - GlobeTrekker",
       html: `
-        <h3>You've got a message</h3>
+        <h2>New Contact Form Submission</h2>
         <p><b>Name:</b> ${name}</p>
         <p><b>Email:</b> ${email}</p>
-        <p><b>Message:</b> ${message}</p>`,
+        <p><b>Message:</b> ${message}</p>
+      `,
     });
+
     res.json({ message: "Message sent successfully" });
   } catch (error) {
-    console.error("Contact form error:", error);
-    res.status(500).json({ error: "Internal server error." });
+    console.error("CONTACT ERROR:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Signup API
+
+// ===================== SIGNUP =====================
 app.post("/signup", async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    if (!email || !password) {
+    if (!email || !password)
       return res.status(400).json({ error: "Email and password are required" });
-    }
+
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
+    if (existingUser)
       return res.status(409).json({ error: "Account exists, please login" });
-    }
+
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = new User({ username, email, passwordHash });
-    await user.save();
+    await new User({ username, email, passwordHash }).save();
+
     res.json({ message: "Signup successful" });
   } catch (err) {
-    console.error(err);
+    console.error("SIGNUP ERROR:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Login API
+// ===================== LOGIN =====================
 app.post("/login", async (req, res) => {
   try {
     const { identifier, password } = req.body;
-    if (!identifier || !password) {
-      return res.status(400).json({ error: "Identifier and password are required" });
-    }
     const user = await User.findOne({
       $or: [{ email: identifier }, { username: identifier }],
     });
-    if (!user) {
-      return res.status(400).json({ error: "Account does not exist" });
-    }
+
+    if (!user) return res.status(400).json({ error: "Account does not exist" });
+
     const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) {
-      return res.status(401).json({ error: "Incorrect password" });
-    }
+    if (!isMatch) return res.status(401).json({ error: "Incorrect password" });
+
     res.json({ message: "Login successful", username: user.username, email: user.email });
   } catch (err) {
-    console.error(err);
+    console.error("LOGIN ERROR:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Register API with email and SMS to user's entered phone number
+// ===================== REGISTER =====================
 app.post("/register", async (req, res) => {
   const { name, email, phone, gender, destination, package: pkg, date, notes } = req.body;
-  if (!name || !email || !phone || !gender || !destination || !pkg || !date) {
+
+  if (!name || !email || !phone || !gender || !destination || !pkg || !date)
     return res.status(400).json({ error: "All fields are required" });
-  }
+
   try {
-    // Save registration
     await Registration.create({ name, email, phone, gender, destination, package: pkg, date, notes });
 
-    // Send email confirmation to user's email
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-    });
+    // Try to send admin email (ignore failure)
+    try {
+      await resend.emails.send({
+        from: "GlobeTrekker Alerts <onboarding@resend.dev>",
+        to: process.env.EMAIL_ADMIN,
+        subject: `New Booking - ${name}`,
+        html: `
+          <h2>New Trip Registration</h2>
+          <p><b>Name:</b> ${name}</p>
+          <p><b>Email:</b> ${email}</p>
+          <p><b>Phone:</b> ${phone}</p>
+          <p><b>Destination:</b> ${destination}</p>
+          <p><b>Package:</b> ${pkg}</p>
+          <p><b>Date:</b> ${date}</p>
+          <p><b>Notes:</b> ${notes || "None"}</p>
+        `,
+      });
+    } catch (emailError) {
+      console.error("EMAIL ERROR (ignored):", emailError);
+    }
 
-    await transporter.sendMail({
-      from: `GlobeTrekker <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Your GlobeTrekker Booking Confirmation",
-      html: `
-        <h2>Hi ${name},</h2>
-        <p>Your booking for ${destination} on ${date} with the ${pkg} package is confirmed.</p>
-        <p>Thank you for registering with GlobeTrekker.</p>`,
-    });
-
+    // Always send success to frontend
     res.json({ message: "Registration successful" });
+
   } catch (error) {
-    console.error("Registration error:", error);
+    console.error("REGISTER ERROR:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
 
 app.get("/", (req, res) => {
   res.send("🔥 GlobeTrekker Backend Running Successfully!");
 });
-
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
