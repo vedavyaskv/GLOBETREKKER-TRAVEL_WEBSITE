@@ -22,7 +22,7 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
 
 app.use(cors({
   origin: [
-    "https://globetrekker-travel.vercel.app", 
+    "https://globetrekker-travel-website.vercel.app/", 
     "http://localhost:3000",
     "http://localhost:5173"
   ],
