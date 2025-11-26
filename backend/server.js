@@ -7,12 +7,7 @@ const bcrypt = require("bcrypt");
 const cors = require("cors");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-let twilioClient = null;
-if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
-  twilioClient = require("twilio")(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-}
+const PORT = process.env.PORT || 5000;
 
 ["MONGO_URI", "EMAIL_USER", "EMAIL_PASS"].forEach((key) => {
   if (!process.env[key]) {
@@ -22,9 +17,9 @@ if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
 
 app.use(cors({
   origin: [
-    "https://globetrekker-travel-website.vercel.app/", 
+    "https://globetrekker-travel-website.vercel.app", 
     "http://localhost:3000",
-    "http://localhost:5173"
+    "http://localhost:5173",
   ],
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -193,23 +188,6 @@ app.post("/register", async (req, res) => {
         <p>Your booking for ${destination} on ${date} with the ${pkg} package is confirmed.</p>
         <p>Thank you for registering with GlobeTrekker.</p>`,
     });
-
-    // Send SMS to the entered number using Twilio
-    if (twilioClient && process.env.TWILIO_PHONE_NUMBER) {
-      const smsMessage = `Hi ${name}, your GlobeTrekker booking for ${destination} (${pkg}) on ${date} is confirmed! Thank you!`;
-      try {
-        await twilioClient.messages.create({
-          body: smsMessage,
-          from: process.env.TWILIO_PHONE_NUMBER,
-          to: phone.startsWith("+") ? phone : "+91" + phone,
-        });
-        console.log(`SMS sent to ${phone}`);
-      } catch (smsErr) {
-        console.warn("SMS send error:", smsErr.message);
-      }
-    } else {
-      console.warn("Twilio SMS not configured, skipping SMS");
-    }
 
     res.json({ message: "Registration successful" });
   } catch (error) {
