@@ -148,3 +148,6 @@ GlobeTrekker/
 ### Thanks for visiting GlobeTrekker!
 
  *Travel the world, one click at a time.*
+
+### Tell us the most challenging problem you solved recently, in 5–7 sentences. Be specific.
+One of the hardest problems I recently tackled was building a unified backend that supports two independent features — a newsletter/subscriber system and a full-fledged trip-registration form — in a clean, maintainable way. I needed to make sure each feature had its own route, storage schema (collections in the database), and email-notification workflow, so they didn’t interfere with each other. Doing this meant carefully designing the API endpoints and database collections so that subscriber data and trip-registration data remain logically separate but manageable under the same backend. I also had to integrate an email delivery mechanism (using something like Nodemailer) to send separate kinds of emails — a welcome email for subscribers, and a confirmation email for trip registrations. Lastly, I ensured that everything remains modular so I or another developer could add more features or modify one without breaking the other.
